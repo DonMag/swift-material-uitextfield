@@ -10,8 +10,8 @@ import UIKit
 
 extension String {
     func isEmail() -> Bool {
-        let regex = try! NSRegularExpression(pattern: "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}$", options: [.CaseInsensitive])
-        return regex.firstMatchInString(self, options:[], range: NSMakeRange(0, utf16.count)) != nil
+        let regex = try! NSRegularExpression(pattern: "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}$", options: [.caseInsensitive])
+        return regex.firstMatch(in: self, options:[], range: NSMakeRange(0, utf16.count)) != nil
     }
 }
 
@@ -31,11 +31,11 @@ class ViewController: UIViewController, UITextFieldDelegate {
     //# MARK: - UITextFieldDelegate
     //
     
-    func textFieldDidEndEditing(textField: UITextField) {
+    func textFieldDidEndEditing(_ textField: UITextField) {
         if textField == emailInput {
             if (emailInput.text!.isEmpty) {
                 emailInput.noteIcon = nil
-                emailInput.noteTextColor = UIColor.darkGrayColor()
+                emailInput.noteTextColor = UIColor.darkGray
                 emailInput.noteText = "Example: jean.timex@gmail.com"
             }
             else if emailInput.text!.isEmail() {
@@ -63,7 +63,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 passwordInput.noteIconColor = UIColorFromRGB(0xC0392B)
                 passwordInput.noteIcon = "\u{f06a}"
                 passwordInput.noteTextColor = UIColorFromRGB(0xC0392B)
-                passwordInput.noteText = "This password is valid"
+                passwordInput.noteText = "This password is invalid"
             }
         }
     }
@@ -72,7 +72,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     // Help function: UInt to UIColor
     // Usage: UIColorFromRGB(0x26A65B)
     //
-    func UIColorFromRGB(rgbValue: UInt) -> UIColor {
+    func UIColorFromRGB(_ rgbValue: UInt) -> UIColor {
         return UIColor(
             red: CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0,
             green: CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0,

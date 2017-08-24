@@ -9,9 +9,9 @@
 import UIKit
 
 extension String {
-    func heightWithConstrainedWidth(width: CGFloat, font: UIFont) -> CGFloat {
-        let constraintRect = CGSize(width: width, height: CGFloat.max)
-        let boundingBox = self.boundingRectWithSize(constraintRect, options: NSStringDrawingOptions.UsesLineFragmentOrigin, attributes: [NSFontAttributeName: font], context: nil)
+    func heightWithConstrainedWidth(_ width: CGFloat, font: UIFont) -> CGFloat {
+        let constraintRect = CGSize(width: width, height: CGFloat.greatestFiniteMagnitude)
+        let boundingBox = self.boundingRect(with: constraintRect, options: NSStringDrawingOptions.usesLineFragmentOrigin, attributes: [NSFontAttributeName: font], context: nil)
         
         return boundingBox.height
     }
@@ -24,27 +24,27 @@ extension String {
     //
     
     // Bottom border layer
-    private var borderLayer: CAShapeLayer!
+    fileprivate var borderLayer: CAShapeLayer!
     // Top label layer
-    private var labelLayer: CATextLayer!
+    fileprivate var labelLayer: CATextLayer!
     // Note icon layer
-    private var noteIconLayer: CATextLayer!
+    fileprivate var noteIconLayer: CATextLayer!
     // Note text layer
-    private var noteTextLayer: CATextLayer!
+    fileprivate var noteTextLayer: CATextLayer!
     // Note font size
-    private var noteFontSize: CGFloat = 12.0
+    fileprivate var noteFontSize: CGFloat = 12.0
     // Cache secure text initial state
-    private var isSecureText: Bool?
+    fileprivate var isSecureText: Bool?
     // The button to toggle secure text entry
-    private var secureToggler: UIButton!
+    fileprivate var secureToggler: UIButton!
     
-    private enum icon: String {
+    fileprivate enum icon: String {
         case openEye = "\u{f06e}"
         case closedEye = "\u{f070}"
     }
     
     // The color of the bottom border
-    @IBInspectable var borderColor: UIColor = UIColor.clearColor() {
+    @IBInspectable var borderColor: UIColor = UIColor.clear {
         didSet {
             setNeedsDisplay()
         }
@@ -58,14 +58,14 @@ extension String {
     }
     
     // The color of the label
-    @IBInspectable var labelColor: UIColor = UIColor.clearColor() {
+    @IBInspectable var labelColor: UIColor = UIColor.clear {
         didSet {
             setNeedsDisplay()
         }
     }
     
     // The color of note text
-    @IBInspectable var noteTextColor: UIColor = UIColor.clearColor() {
+    @IBInspectable var noteTextColor: UIColor = UIColor.clear {
         didSet {
             setNeedsDisplay()
         }
@@ -79,7 +79,7 @@ extension String {
     }
     
     // The color of note icon
-    var noteIconColor: UIColor = UIColor.clearColor() {
+    var noteIconColor: UIColor = UIColor.clear {
         didSet {
             setNeedsDisplay()
         }
@@ -92,16 +92,16 @@ extension String {
         }
     }
     
-    override var secureTextEntry: Bool {
+    override var isSecureTextEntry: Bool {
         set {
-            super.secureTextEntry = newValue
+            super.isSecureTextEntry = newValue
             // Here we remember the initial secureTextEntry setting
             if isSecureText == nil && newValue {
                 isSecureText = true
             }
         }
         get {
-            return super.secureTextEntry
+            return super.isSecureTextEntry
         }
     }
     
@@ -121,18 +121,18 @@ extension String {
     //
     // Cleanup the notification/event listeners when the view is about to dissapear
     //
-    override func willMoveToWindow(newWindow: UIWindow?) {
-        super.willMoveToWindow(newWindow)
+    override func willMove(toWindow newWindow: UIWindow?) {
+        super.willMove(toWindow: newWindow)
         
         if newWindow == nil {
-            NSNotificationCenter.defaultCenter().removeObserver(self)
+            NotificationCenter.default.removeObserver(self)
         } else {
             registerNotifications()
         }
     }
     
     func registerNotifications() {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(MaterialUITextField.onTextChanged), name: UITextFieldTextDidChangeNotification, object: self)
+        NotificationCenter.default.addObserver(self, selector: #selector(MaterialUITextField.onTextChanged), name: NSNotification.Name.UITextFieldTextDidChange, object: self)
     }
     
     func initRightView() {
@@ -140,20 +140,20 @@ extension String {
             // Show the secure text toggler
             let togglerText: String = icon.closedEye.rawValue
             let togglerFont: UIFont = UIFont(name: "FontAwesome", size: 14.0)!
-            let togglerTextSize = (togglerText as NSString).sizeWithAttributes([NSFontAttributeName: togglerFont])
+            let togglerTextSize = (togglerText as NSString).size(attributes: [NSFontAttributeName: togglerFont])
             
-            secureToggler = UIButton(type: UIButtonType.Custom)
-            secureToggler.frame = CGRectMake(0, 0, togglerTextSize.width, togglerTextSize.height)
-            secureToggler.setTitle(togglerText, forState: UIControlState.Normal)
-            secureToggler.setTitleColor(UIColor.blackColor(), forState: UIControlState.Normal)
+            secureToggler = UIButton(type: UIButtonType.custom)
+            secureToggler.frame = CGRect(x: 0, y: 0, width: togglerTextSize.width, height: togglerTextSize.height)
+            secureToggler.setTitle(togglerText, for: UIControlState())
+            secureToggler.setTitleColor(UIColor.black, for: UIControlState())
             secureToggler.titleLabel?.font = togglerFont
-            secureToggler.addTarget(self, action: #selector(MaterialUITextField.toggleSecureTextEntry), forControlEvents: .TouchUpInside)
+            secureToggler.addTarget(self, action: #selector(MaterialUITextField.toggleSecureTextEntry), for: .touchUpInside)
             
             rightView = secureToggler
-            rightViewMode = UITextFieldViewMode.Always
+            rightViewMode = UITextFieldViewMode.always
         } else {
             // Show the clear button
-            self.clearButtonMode = UITextFieldViewMode.WhileEditing
+            self.clearButtonMode = UITextFieldViewMode.whileEditing
         }
     }
     
@@ -170,18 +170,18 @@ extension String {
     
     func setupLabel() {
         if labelLayer == nil && placeholder != nil {
-            let labelSize = ((placeholder! as NSString)).sizeWithAttributes([NSFontAttributeName: font!])
+            let labelSize = ((placeholder! as NSString)).size(attributes: [NSFontAttributeName: font!])
             
             labelLayer = CATextLayer()
             labelLayer.opacity = 0
             labelLayer.string = placeholder
             labelLayer.font = font
             labelLayer.fontSize = (font?.pointSize)!
-            labelLayer.foregroundColor = labelColor.CGColor
-            labelLayer.wrapped = false
+            labelLayer.foregroundColor = labelColor.cgColor
+            labelLayer.isWrapped = false
             labelLayer.alignmentMode = kCAAlignmentLeft
-            labelLayer.contentsScale = UIScreen.mainScreen().scale
-            labelLayer.frame = CGRectMake(0, (layer.bounds.size.height - labelSize.height) / 2.0, labelSize.width, labelSize.height)
+            labelLayer.contentsScale = UIScreen.main.scale
+            labelLayer.frame = CGRect(x: 0, y: (layer.bounds.size.height - labelSize.height) / 2.0, width: labelSize.width, height: labelSize.height)
             
             layer.addSublayer(labelLayer)
         }
@@ -190,10 +190,10 @@ extension String {
     func setupNote() {
         if noteIconLayer == nil {
             noteIconLayer = CATextLayer()
-            noteIconLayer.font = "FontAwesome"
+            noteIconLayer.font = "FontAwesome" as CFTypeRef?
             noteIconLayer.fontSize = noteFontSize
             noteIconLayer.alignmentMode = kCAAlignmentLeft
-            noteIconLayer.contentsScale = UIScreen.mainScreen().scale
+            noteIconLayer.contentsScale = UIScreen.main.scale
             
             layer.addSublayer(noteIconLayer)
         }
@@ -202,9 +202,9 @@ extension String {
             noteTextLayer = CATextLayer()
             noteTextLayer.font = font
             noteTextLayer.fontSize = noteFontSize
-            noteTextLayer.wrapped = true
+            noteTextLayer.isWrapped = true
             noteTextLayer.alignmentMode = kCAAlignmentLeft
-            noteTextLayer.contentsScale = UIScreen.mainScreen().scale
+            noteTextLayer.contentsScale = UIScreen.main.scale
             
             layer.addSublayer(noteTextLayer)
         }
@@ -228,8 +228,8 @@ extension String {
         setupNote()
     }
     
-    override func drawRect(rect: CGRect) {
-        super.drawRect(rect)
+    override func draw(_ rect: CGRect) {
+        super.draw(rect)
         
         drawBorder()
         drawLabel()
@@ -244,13 +244,13 @@ extension String {
             let size = layer.frame.size
             let path = UIBezierPath()
             
-            path.moveToPoint(CGPointMake(0, size.height))
-            path.addLineToPoint(CGPointMake(size.width, size.height))
-            path.closePath()
+            path.move(to: CGPoint(x: 0, y: size.height))
+            path.addLine(to: CGPoint(x: size.width, y: size.height))
+            path.close()
             
             borderLayer.lineWidth = borderWidth
-            borderLayer.strokeColor = borderColor.CGColor
-            borderLayer.path = path.CGPath
+            borderLayer.strokeColor = borderColor.cgColor
+            borderLayer.path = path.cgPath
         }
     }
     
@@ -259,7 +259,7 @@ extension String {
     //
     func drawLabel() {
         if labelLayer != nil {
-            labelLayer.foregroundColor = labelColor.CGColor
+            labelLayer.foregroundColor = labelColor.cgColor
         }
     }
     
@@ -271,11 +271,11 @@ extension String {
         
         if noteIconLayer != nil {
             let noteIconFont: UIFont = UIFont(name: "FontAwesome", size: noteFontSize)!
-            let noteIconSize = ((noteIcon ?? "") as NSString).sizeWithAttributes([NSFontAttributeName: noteIconFont])
+            let noteIconSize = ((noteIcon ?? "") as NSString).size(attributes: [NSFontAttributeName: noteIconFont])
             
             noteIconLayer.string = noteIcon
-            noteIconLayer.foregroundColor = noteIconColor.CGColor
-            noteIconLayer.frame = CGRectMake(0, layer.bounds.size.height + 5.0, noteIconSize.width, noteIconSize.height)
+            noteIconLayer.foregroundColor = noteIconColor.cgColor
+            noteIconLayer.frame = CGRect(x: 0, y: layer.bounds.size.height + 5.0, width: noteIconSize.width, height: noteIconSize.height)
             
             if noteIcon != nil {
                 startX = noteIconSize.width + 5.0
@@ -287,8 +287,8 @@ extension String {
             let noteHeight = (noteText ?? "").heightWithConstrainedWidth(noteWidth, font: UIFont(name: (font?.fontName)!, size: noteFontSize)!)
             
             noteTextLayer.string = noteText
-            noteTextLayer.foregroundColor = noteTextColor.CGColor
-            noteTextLayer.frame = CGRectMake(startX, layer.bounds.size.height + 2.0, noteWidth, noteHeight)
+            noteTextLayer.foregroundColor = noteTextColor.cgColor
+            noteTextLayer.frame = CGRect(x: startX, y: layer.bounds.size.height + 2.0, width: noteWidth, height: noteHeight)
         }
     }
     
@@ -300,10 +300,10 @@ extension String {
         // Resign and restore the first responder
         // solves the font issue
         resignFirstResponder()
-        secureTextEntry = !secureTextEntry
+        isSecureTextEntry = !isSecureTextEntry
         becomeFirstResponder()
         
-        secureToggler.setTitle(secureTextEntry ? icon.closedEye.rawValue : icon.openEye.rawValue, forState: UIControlState.Normal)
+        secureToggler.setTitle(isSecureTextEntry ? icon.closedEye.rawValue : icon.openEye.rawValue, for: UIControlState())
         
         // A trick to reset the cursor position after toggle secureTextEntry
         let temp = text
@@ -325,23 +325,23 @@ extension String {
         if text?.characters.count == 0 {
             // Move the label back
             opacityAnimation.toValue = 0
-            let labelSize = ((placeholder! as NSString)).sizeWithAttributes([NSFontAttributeName: font!])
+            let labelSize = ((placeholder! as NSString)).size(attributes: [NSFontAttributeName: font!])
             positionAnimation.toValue = (layer.bounds.size.height - labelSize.height) / 2.0
         } else {
             // Move up the label
             opacityAnimation.toValue = 1
-            let labelSize = ((placeholder! as NSString)).sizeWithAttributes([NSFontAttributeName: font!])
+            let labelSize = ((placeholder! as NSString)).size(attributes: [NSFontAttributeName: font!])
             positionAnimation.toValue = -labelSize.height
         }
         
         let group = CAAnimationGroup()
         group.animations = [opacityAnimation, positionAnimation]
         group.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut)
-        group.removedOnCompletion = false
+        group.isRemovedOnCompletion = false
         group.fillMode = kCAFillModeForwards
         group.duration = 0.2
         
-        labelLayer.addAnimation(group, forKey: nil)
+        labelLayer.add(group, forKey: nil)
     }
     
 }
